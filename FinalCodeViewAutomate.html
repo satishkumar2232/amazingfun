@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html>
+  <head>
+   <meta charset="UTF-8" />
+    <title>YouTube View Count Tool</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+      }
+
+      h1 {
+        font-size: 32px;
+        text-align: center;
+        margin-top: 20px;
+      }
+
+      form {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin-top: 40px;
+      }
+
+      label {
+        font-size: 24px;
+        margin-bottom: 10px;
+      }
+
+      input {
+        width: 400px;
+        padding: 10px;
+        font-size: 20px;
+        border: none;
+        border-radius: 5px;
+        margin-bottom: 20px;
+      }
+
+      button {
+        padding: 10px 20px;
+        background-color: #ff0000;
+        color: #fff;
+        border: none;
+        border-radius: 5px;
+        font-size: 24px;
+        cursor: pointer;
+      }
+
+      button:hover {
+        background-color: #c70000;
+      }
+
+      #view-count {
+        font-size: 36px;
+        text-align: center;
+        margin-top: 40px;
+      }
+
+      .button-container {
+        display: flex;
+        justify-content: center;
+        margin-top: 20px;
+      }
+
+      .like-button,
+      .comment-button {
+        padding: 10px 20px;
+        background-color: #ccc;
+        color: #000;
+        border: none;
+        border-radius: 5px;
+        font-size: 24px;
+        cursor: pointer;
+        margin-right: 20px;
+      }
+
+      .like-button:hover,
+      .comment-button:hover {
+        background-color: #b3b3b3;
+      }
+    </style>
+  
+  </head>
+  <body>
+    <h1>YouTube View Count Tool</h1>
+    <form>
+      <label for="video-url">Enter YouTube Video URL:</label>
+      <input type="text" id="video-url" name="video-url" required />
+      <button type="submit">Get View Count</button>
+    </form>
+    <div id="view-count"></div>
+    <script>
+      const form = document.querySelector("form");
+      const viewCountDiv = document.getElementById("view-count");
+      let videoId = null;
+
+      form.addEventListener("submit", (event) => {
+        event.preventDefault();
+        const videoUrl = document.getElementById("video-url").value;
+        videoId = getVideoIdFromUrl(videoUrl);
+        if (videoId) {
+          fetchViewCount();
+          setInterval(fetchViewCount, 5000); // poll every 5 seconds
+        } else {
+          viewCountDiv.innerHTML = "Invalid YouTube video URL.";
+        }
+      });
+
+      const fetchViewCount = () => {
+        fetch(
+          `https://www.googleapis.com/youtube/v3/videos?part=statistics&id=${videoId}&key=AIzaSyBhwvjTisykAfjO8Z5T-zleuk8HQymc5B0`
+        )
+          .then((response) => response.json())
+          .then((data) => {
+            const viewCount = data.items[0].statistics.viewCount;
+            const likeCount = data.items[0].statistics.likeCount;
+            const commentCount = data.items[0].statistics.commentCount;
+            viewCountDiv.innerHTML = `Current View Count: ${viewCount}, Likes: ${likeCount}, Comments: ${commentCount}`;
+          })
+          .catch((error) => {
+            console.log(error);
+            viewCountDiv.innerHTML = "Error retrieving view count.";
+          });
+      };
+
+      const getVideoIdFromUrl = (url) => {
+        const regex = /(?:v=|\/watch\?v=)([A-Za-z0-9_-]{11}).*/;
+        const match = url.match(regex);
+        return match ? match[1] : null;
+      };
+    </script>
+  </body>
+</html>
